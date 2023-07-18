@@ -25,3 +25,7 @@ variable "image_id" {
 variable "instance_type" {
   description = "instance type"
 }
+
+variable "iam_role" {
+  description = "iam role"
+}

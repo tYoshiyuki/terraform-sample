@@ -7,10 +7,6 @@ terraform {
   }
 }
 
-provider "aws" {
-  region = "ap-northeast-1"
-}
-
 data "aws_caller_identity" "current" {}
 
 resource "aws_security_group" "security_group" {
@@ -75,7 +71,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 resource "aws_launch_template" "launch_template" {
   name = var.windows_server_launch_template
   iam_instance_profile {
-    arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:instance-profile/AmazonSSMManagedInstanceCore"
+    arn = aws_iam_instance_profile.iam.arn
   }
   vpc_security_group_ids = [
     aws_security_group.security_group.id
