@@ -15,17 +15,17 @@ variable "windows_server_auto_scaling" {
 }
 
 variable "key_name" {
-  description = "key name"
+  description = "key name."
 }
 
 variable "image_id" {
-  description = "image id"
+  description = "image id."
 }
 
 variable "instance_type" {
-  description = "instance type"
+  description = "instance type."
 }
 
 variable "iam_role" {
-  description = "iam role"
+  description = "iam role."
 }
