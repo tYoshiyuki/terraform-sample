@@ -20,3 +20,12 @@ resource "aws_iam_instance_profile" "iam" {
   name = aws_iam_role.iam.name
   role = aws_iam_role.iam.name
 }
+
+data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
+  arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+resource "aws_iam_role_policy_attachment" "iam" {
+  role = aws_iam_role.iam.name
+  policy_arn = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
+}
