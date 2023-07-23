@@ -108,7 +108,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 
 resource "aws_launch_template" "launch_template" {
   name = var.launch_template_name
-  user_data = filebase64("user-data.sh")
+  user_data = filebase64("user_data.sh")
   iam_instance_profile {
     arn = aws_iam_instance_profile.iam.arn
   }
