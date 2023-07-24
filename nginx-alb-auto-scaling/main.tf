@@ -106,6 +106,37 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   }
 }
 
+resource "aws_autoscaling_group" "autoscaling_group_canary" {
+  name = "${var.auto_scaling_name}-canary"
+  launch_template {
+    id = aws_launch_template.launch_template.id
+    version = "1"
+  }
+  min_size = 1
+  max_size = 1
+  desired_capacity = 1
+  default_cooldown = 300
+  vpc_zone_identifier = [
+    "subnet-fabe92a1",
+    "subnet-3681451d",
+    "subnet-3945b771"
+  ]
+  target_group_arns = [
+    aws_lb_target_group.lb_target_group_canary.arn
+  ]
+  health_check_type = "EC2"
+  health_check_grace_period = 300
+  termination_policies = [
+    "Default"
+  ]
+  service_linked_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
+  tag {
+    key = "Name"
+    value = "${var.auto_scaling_name}-canary"
+    propagate_at_launch = true
+  }
+}
+
 resource "aws_launch_template" "launch_template" {
   name = var.launch_template_name
   user_data = filebase64("user_data.sh")
@@ -149,8 +180,17 @@ resource "aws_lb_listener" "lb_listener" {
   port = 80
   protocol = "HTTP"
   default_action {
-    target_group_arn = aws_lb_target_group.lb_target_group.arn
     type = "forward"
+    forward {
+      target_group {
+        arn = aws_lb_target_group.lb_target_group.arn
+        weight = 2
+      }
+      target_group {
+        arn = aws_lb_target_group.lb_target_group_canary.arn
+        weight = 1
+      }
+    }
   }
 }
 
@@ -170,4 +210,22 @@ resource "aws_lb_target_group" "lb_target_group" {
   target_type = "instance"
   vpc_id = var.vpc_id
   name = var.tg_name
+}
+
+resource "aws_lb_target_group" "lb_target_group_canary" {
+  health_check {
+    interval = 30
+    path = "/"
+    port = "traffic-port"
+    protocol = "HTTP"
+    timeout = 5
+    unhealthy_threshold = 2
+    healthy_threshold = 5
+    matcher = "200"
+  }
+  port = 80
+  protocol = "HTTP"
+  target_type = "instance"
+  vpc_id = var.vpc_id
+  name = "${var.tg_name}-canary"
 }
