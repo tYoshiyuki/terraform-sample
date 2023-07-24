@@ -86,9 +86,9 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   desired_capacity = 1
   default_cooldown = 300
   vpc_zone_identifier = [
-    "subnet-fabe92a1",
-    "subnet-3681451d",
-    "subnet-3945b771"
+    var.vpc_subnet1,
+    var.vpc_subnet2,
+    var.vpc_subnet3
   ]
   target_group_arns = [
     aws_lb_target_group.lb_target_group.arn
@@ -117,9 +117,9 @@ resource "aws_autoscaling_group" "autoscaling_group_canary" {
   desired_capacity = 1
   default_cooldown = 300
   vpc_zone_identifier = [
-    "subnet-fabe92a1",
-    "subnet-3681451d",
-    "subnet-3945b771"
+    var.vpc_subnet1,
+    var.vpc_subnet2,
+    var.vpc_subnet3
   ]
   target_group_arns = [
     aws_lb_target_group.lb_target_group_canary.arn
@@ -156,9 +156,9 @@ resource "aws_lb" "lb" {
   internal = false
   load_balancer_type = "application"
   subnets = [
-    "subnet-3681451d",
-    "subnet-3945b771",
-    "subnet-fabe92a1"
+    var.vpc_subnet1,
+    var.vpc_subnet2,
+    var.vpc_subnet3
   ]
   security_groups = [
     aws_security_group.security_group.id
