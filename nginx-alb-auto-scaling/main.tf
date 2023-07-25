@@ -146,7 +146,7 @@ resource "aws_launch_template" "launch_template" {
   vpc_security_group_ids = [
     aws_security_group.security_group_ec2.id
   ]
-  key_name = var.key_name
+  key_name = aws_key_pair.key_pair.key_name
   image_id = var.image_id
   instance_type = var.instance_type
 }
