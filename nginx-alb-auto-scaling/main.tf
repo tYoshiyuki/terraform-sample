@@ -9,11 +9,11 @@ terraform {
 
 data "aws_caller_identity" "current" {}
 
-resource "aws_security_group" "security_group" {
-  description = var.sg_alb_name
-  name = var.sg_alb_name
+resource "aws_security_group" "security_group_alb" {
+  description = local.sg_alb_name
+  name = local.sg_alb_name
   tags = {
-    Name = var.sg_alb_name
+    Name = local.sg_alb_name
   }
   vpc_id = var.vpc_id
   ingress {
@@ -43,10 +43,10 @@ resource "aws_security_group" "security_group" {
 }
 
 resource "aws_security_group" "security_group_ec2" {
-  description = var.sg_ec2_name
-  name = var.sg_ec2_name
+  description = local.sg_ec2_name
+  name = local.sg_ec2_name
   tags = {
-    Name = var.sg_ec2_name
+    Name = local.sg_ec2_name
   }
   vpc_id = var.vpc_id
   ingress {
@@ -76,7 +76,7 @@ resource "aws_security_group" "security_group_ec2" {
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name = var.auto_scaling_name
+  name = local.auto_scaling_name
   launch_template {
     id = aws_launch_template.launch_template.id
     version = "1"
@@ -101,13 +101,13 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   service_linked_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
   tag {
     key = "Name"
-    value = var.auto_scaling_name
+    value = local.auto_scaling_name
     propagate_at_launch = true
   }
 }
 
 resource "aws_autoscaling_group" "autoscaling_group_canary" {
-  name = "${var.auto_scaling_name}-canary"
+  name = "${local.auto_scaling_name}-canary"
   launch_template {
     id = aws_launch_template.launch_template.id
     version = "1"
@@ -132,13 +132,13 @@ resource "aws_autoscaling_group" "autoscaling_group_canary" {
   service_linked_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
   tag {
     key = "Name"
-    value = "${var.auto_scaling_name}-canary"
+    value = "${local.auto_scaling_name}-canary"
     propagate_at_launch = true
   }
 }
 
 resource "aws_launch_template" "launch_template" {
-  name = var.launch_template_name
+  name = local.launch_template_name
   user_data = filebase64("user_data.sh")
   iam_instance_profile {
     arn = aws_iam_instance_profile.iam.arn
@@ -147,12 +147,12 @@ resource "aws_launch_template" "launch_template" {
     aws_security_group.security_group_ec2.id
   ]
   key_name = aws_key_pair.key_pair.key_name
-  image_id = var.image_id
-  instance_type = var.instance_type
+  image_id = local.image_id
+  instance_type = local.instance_type
 }
 
 resource "aws_lb" "lb" {
-  name = var.alb_name
+  name = local.alb_name
   internal = false
   load_balancer_type = "application"
   subnets = [
@@ -161,7 +161,7 @@ resource "aws_lb" "lb" {
     var.vpc_subnet3
   ]
   security_groups = [
-    aws_security_group.security_group.id
+    aws_security_group.security_group_alb.id
   ]
   ip_address_type = "ipv4"
   access_logs {
@@ -209,7 +209,7 @@ resource "aws_lb_target_group" "lb_target_group" {
   protocol = "HTTP"
   target_type = "instance"
   vpc_id = var.vpc_id
-  name = var.tg_name
+  name = local.tg_name
 }
 
 resource "aws_lb_target_group" "lb_target_group_canary" {
@@ -227,5 +227,5 @@ resource "aws_lb_target_group" "lb_target_group_canary" {
   protocol = "HTTP"
   target_type = "instance"
   vpc_id = var.vpc_id
-  name = "${var.tg_name}-canary"
+  name = "${local.tg_name}-canary"
 }
