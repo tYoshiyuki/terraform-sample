@@ -1,6 +1,6 @@
 resource "aws_iam_role" "iam" {
   path = "/"
-  name = var.iam_role
+  name = local.iam_role
   assume_role_policy = file("./iam_policy.json")
   max_session_duration = 3600
   tags = {}

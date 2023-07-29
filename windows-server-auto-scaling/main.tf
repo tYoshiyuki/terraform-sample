@@ -10,10 +10,10 @@ terraform {
 data "aws_caller_identity" "current" {}
 
 resource "aws_security_group" "security_group" {
-  description = var.sg_name
-  name = var.sg_name
+  description = local.sg_name
+  name = local.sg_name
   tags = {
-    Name = var.sg_name
+    Name = local.sg_name
   }
   vpc_id = var.vpc_id
   ingress {
@@ -43,7 +43,7 @@ resource "aws_security_group" "security_group" {
 }
 
 resource "aws_autoscaling_group" "autoscaling_group" {
-  name = var.windows_server_auto_scaling
+  name = local.windows_server_auto_scaling
   launch_template {
     id = aws_launch_template.launch_template.id
     version = "1"
@@ -63,13 +63,13 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   service_linked_role_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
   tag {
     key = "Name"
-    value = var.windows_server_auto_scaling
+    value = local.windows_server_auto_scaling
     propagate_at_launch = true
   }
 }
 
 resource "aws_launch_template" "launch_template" {
-  name = var.windows_server_launch_template
+  name = local.windows_server_launch_template
   iam_instance_profile {
     arn = aws_iam_instance_profile.iam.arn
   }
@@ -77,6 +77,6 @@ resource "aws_launch_template" "launch_template" {
     aws_security_group.security_group.id
   ]
   key_name = aws_key_pair.key_pair.key_name
-  image_id = var.image_id
-  instance_type = var.instance_type
+  image_id = local.image_id
+  instance_type = local.instance_type
 }
