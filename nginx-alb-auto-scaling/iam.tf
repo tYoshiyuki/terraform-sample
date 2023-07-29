@@ -1,16 +1,7 @@
 resource "aws_iam_role" "iam" {
   path = "/"
   name = local.iam_role_name
-  assume_role_policy = jsonencode({
-    "Version":"2012-10-17",
-    "Statement":[{
-      "Effect":"Allow",
-      "Principal":{
-        "Service":"ec2.amazonaws.com"
-      },
-      "Action":"sts:AssumeRole"
-    }]
-  })
+  assume_role_policy = file("./iam_policy.json")
   max_session_duration = 3600
   tags = {}
 }
