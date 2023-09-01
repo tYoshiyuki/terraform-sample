@@ -10,3 +10,7 @@ Terraform のサンプル。
 ### nginx-alb-auto-scaling
 - Amazon Linux 2023 + ALB + オートスケーリンググループ のサンプル
 - オートスケーリンググループは、プロダクション・カナリアの複数構成
+
+### apache-alb-auto-scaling
+- Amazon Linux 2023 + ALB + オートスケーリンググループ のサンプル
+- オートスケーリンググループは、プロダクション・カナリアの複数構成
