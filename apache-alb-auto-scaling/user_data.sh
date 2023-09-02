@@ -19,8 +19,9 @@ cat /opt/codedeploy-agent/.version
 
 # Apache HTTP Server
 sudo dnf install httpd -y
-sudo systemctl start httpd
-sudo systemctl enable httpd
 
 touch /var/www/html/index.html
 echo "Apache ALB AutoScaling Sample!" | tee -a /var/www/html/index.html
+
+sudo systemctl start httpd
+sudo systemctl enable httpd

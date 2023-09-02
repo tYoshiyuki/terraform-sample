@@ -9,4 +9,5 @@ locals {
   iam_role_name = "ApacheAlbEC2IAMRole"
   image_id = "ami-0947c48ae0aaf6781"
   instance_type = "t2.micro"
+  s3_name = "sample-apache-s3"
 }

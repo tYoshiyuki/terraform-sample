@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source = "hashicorp/aws"
-      version = "~> 3.0"
+      version = "~> 4.0"
     }
   }
 }
@@ -196,13 +196,13 @@ resource "aws_lb_listener" "lb_listener" {
 
 resource "aws_lb_target_group" "lb_target_group" {
   health_check {
-    interval = 30
+    interval = 5
     path = "/"
     port = "traffic-port"
     protocol = "HTTP"
-    timeout = 5
+    timeout = 2
     unhealthy_threshold = 2
-    healthy_threshold = 5
+    healthy_threshold = 2
     matcher = "200"
   }
   port = 80
@@ -214,13 +214,13 @@ resource "aws_lb_target_group" "lb_target_group" {
 
 resource "aws_lb_target_group" "lb_target_group_canary" {
   health_check {
-    interval = 30
+    interval = 5
     path = "/"
     port = "traffic-port"
     protocol = "HTTP"
-    timeout = 5
+    timeout = 2
     unhealthy_threshold = 2
-    healthy_threshold = 5
+    healthy_threshold = 2
     matcher = "200"
   }
   port = 80
@@ -228,4 +228,23 @@ resource "aws_lb_target_group" "lb_target_group_canary" {
   target_type = "instance"
   vpc_id = var.vpc_id
   name = "${local.tg_name}-canary"
+}
+
+resource "aws_s3_bucket" "s3_bucket" {
+  bucket = local.s3_name
+}
+
+resource "aws_s3_object" "s3_object" {
+  bucket = aws_s3_bucket.s3_bucket.id
+  key = "SampleApp_Linux.zip"
+  source = "${path.module}/SampleApp_Linux.zip"
+}
+
+
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_ownership_controls" {
+  bucket = aws_s3_bucket.s3_bucket.id
+
+  rule {
+    object_ownership = "BucketOwnerEnforced"
+  }
 }
