@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.0"
-    }
-  }
-}
-
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   family = local.ecs_task_definition_name
   requires_compatibilities = ["FARGATE"]
