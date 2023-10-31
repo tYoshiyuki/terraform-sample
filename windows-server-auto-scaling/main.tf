@@ -1,12 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-      version = "~> 3.0"
-    }
-  }
-}
-
 data "aws_caller_identity" "current" {}
 
 resource "aws_security_group" "security_group" {
