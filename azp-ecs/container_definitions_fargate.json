@@ -1,0 +1,41 @@
+[
+  {
+    "name": "azp-agent",
+    "image": "${image_rul}",
+    "cpu": 0,
+    "portMappings": [],
+    "essential": true,
+    "environment": [
+      {
+        "name": "AZP_URL",
+        "value": ""
+      },
+      {
+        "name": "AZP_TOKEN",
+        "value": ""
+      },
+      {
+        "name": "AZP_AGENT_NAME",
+        "value": ""
+      },
+      {
+        "name": "AZP_POOL",
+        "value": ""
+      }
+    ],
+    "environmentFiles": [],
+    "mountPoints": [],
+    "volumesFrom": [],
+    "ulimits": [],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-create-group": "true",
+        "awslogs-group": "/ecs/${awslogs_group_name}",
+        "awslogs-region": "ap-northeast-1",
+        "awslogs-stream-prefix": "ecs"
+      },
+      "secretOptions": []
+    }
+  }
+]
