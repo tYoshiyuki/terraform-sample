@@ -239,3 +239,56 @@ resource "aws_s3_bucket_ownership_controls" "s3_bucket_ownership_controls" {
     object_ownership = "BucketOwnerEnforced"
   }
 }
+
+resource "aws_codedeploy_app" "code_deploy_app" {
+  name             = local.code_deploy_app_name
+  compute_platform = "Server"
+}
+
+resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
+  app_name               = aws_codedeploy_app.code_deploy_app.name
+  deployment_group_name  = local.aws_codedeploy_deployment_group_name
+  deployment_config_name = "CodeDeployDefault.AllAtOnce"
+  service_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/CodeDeployRole"
+  autoscaling_groups     = [aws_autoscaling_group.autoscaling_group.name]
+
+  alarm_configuration {
+    enabled                   = false
+    ignore_poll_alarm_failure = false
+  }
+
+  deployment_style {
+    deployment_type   = "IN_PLACE"
+    deployment_option = "WITH_TRAFFIC_CONTROL"
+  }
+
+  load_balancer_info {
+    target_group_info {
+      name = aws_lb_target_group.lb_target_group.name
+    }
+  }
+}
+
+resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group_bg" {
+  app_name               = aws_codedeploy_app.code_deploy_app.name
+  deployment_group_name  = local.aws_codedeploy_deployment_group_bg_name
+  deployment_config_name = "CodeDeployDefault.AllAtOnce"
+  service_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/CodeDeployRole"
+  autoscaling_groups     = [aws_autoscaling_group.autoscaling_group.name]
+
+  alarm_configuration {
+    enabled                   = false
+    ignore_poll_alarm_failure = false
+  }
+
+  deployment_style {
+    deployment_type   = "BLUE_GREEN"
+    deployment_option = "WITH_TRAFFIC_CONTROL"
+  }
+
+  load_balancer_info {
+    target_group_info {
+      name = aws_autoscaling_group.autoscaling_group.name
+    }
+  }
+}
