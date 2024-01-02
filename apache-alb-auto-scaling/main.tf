@@ -281,6 +281,7 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group_bg" {
     ignore_poll_alarm_failure = false
   }
 
+  # NOTE Blue/Green実施前、予めインプレースデプロイに設定し、デプロイを実施する必要がある
   deployment_style {
     deployment_type   = "BLUE_GREEN"
     deployment_option = "WITH_TRAFFIC_CONTROL"
@@ -288,7 +289,7 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group_bg" {
 
   load_balancer_info {
     target_group_info {
-      name = aws_autoscaling_group.autoscaling_group.name
+      name = aws_lb_target_group.lb_target_group.name
     }
   }
 }
