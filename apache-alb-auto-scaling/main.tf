@@ -222,7 +222,8 @@ resource "aws_lb_target_group" "lb_target_group_canary" {
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
-  bucket = local.s3_name
+  bucket        = local.s3_name
+  force_destroy = true
 }
 
 resource "aws_s3_object" "s3_object" {
@@ -231,6 +232,12 @@ resource "aws_s3_object" "s3_object" {
   source = "${path.module}/SampleApp_Linux.zip"
 }
 
+resource "aws_s3_bucket_versioning" "s3_bucket_versioning" {
+  bucket = aws_s3_bucket.s3_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 
 resource "aws_s3_bucket_ownership_controls" "s3_bucket_ownership_controls" {
   bucket = aws_s3_bucket.s3_bucket.id
@@ -247,16 +254,11 @@ resource "aws_codedeploy_app" "code_deploy_app" {
 
 resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
   app_name               = aws_codedeploy_app.code_deploy_app.name
-  deployment_group_name  = local.aws_codedeploy_deployment_group_name
+  deployment_group_name  = local.codedeploy_deployment_group_name
   deployment_config_name = "CodeDeployDefault.AllAtOnce"
   service_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/CodeDeployRole"
   autoscaling_groups     = [aws_autoscaling_group.autoscaling_group.name]
-
-  alarm_configuration {
-    enabled                   = false
-    ignore_poll_alarm_failure = false
-  }
-
+  
   deployment_style {
     deployment_type   = "IN_PLACE"
     deployment_option = "WITH_TRAFFIC_CONTROL"
@@ -271,25 +273,80 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
 
 resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group_bg" {
   app_name               = aws_codedeploy_app.code_deploy_app.name
-  deployment_group_name  = local.aws_codedeploy_deployment_group_bg_name
+  deployment_group_name  = local.codedeploy_deployment_group_bg_name
   deployment_config_name = "CodeDeployDefault.AllAtOnce"
   service_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/CodeDeployRole"
   autoscaling_groups     = [aws_autoscaling_group.autoscaling_group.name]
 
-  alarm_configuration {
-    enabled                   = false
-    ignore_poll_alarm_failure = false
-  }
-
-  # NOTE Blue/Green実施前、予めインプレースデプロイに設定し、デプロイを実施する必要がある
   deployment_style {
     deployment_type   = "BLUE_GREEN"
     deployment_option = "WITH_TRAFFIC_CONTROL"
   }
 
+  blue_green_deployment_config {
+    deployment_ready_option {
+      action_on_timeout = "CONTINUE_DEPLOYMENT"
+    }
+
+    terminate_blue_instances_on_deployment_success {
+      action                           = "TERMINATE"
+      termination_wait_time_in_minutes = 0
+    }
+
+    green_fleet_provisioning_option {
+      action = "COPY_AUTO_SCALING_GROUP"
+    }
+  }
+
   load_balancer_info {
     target_group_info {
       name = aws_lb_target_group.lb_target_group.name
+    }
+  }
+}
+
+resource "aws_codepipeline" "codepipeline" {
+  name     = local.codepipeline_name
+  role_arn = aws_iam_role.iam_codepipeline.arn
+  artifact_store {
+    location = aws_s3_bucket.s3_bucket.bucket
+    type     = "S3"
+  }
+  stage {
+    name = "Source"
+    action {
+      name     = "Source"
+      category = "Source"
+      owner    = "AWS"
+      configuration = {
+        PollForSourceChanges = "true"
+        S3Bucket             = aws_s3_bucket.s3_bucket.bucket
+        S3ObjectKey          = "SampleApp_Linux.zip"
+      }
+      provider = "S3"
+      version  = "1"
+      output_artifacts = [
+        "SourceArtifact"
+      ]
+      run_order = 1
+    }
+  }
+  stage {
+    name = "Deploy"
+    action {
+      name     = "Deploy"
+      category = "Deploy"
+      owner    = "AWS"
+      configuration = {
+        ApplicationName     = aws_codedeploy_app.code_deploy_app.name
+        DeploymentGroupName = aws_codedeploy_deployment_group.codedeploy_deployment_group_bg.deployment_group_name
+      }
+      input_artifacts = [
+        "SourceArtifact"
+      ]
+      provider  = "CodeDeploy"
+      version   = "1"
+      run_order = 1
     }
   }
 }
