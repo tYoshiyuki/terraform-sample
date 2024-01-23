@@ -196,7 +196,7 @@ resource "aws_lb_target_group" "lb_target_group" {
     healthy_threshold   = 2
     matcher             = "200"
   }
-  deregistration_delay = 300
+  deregistration_delay = 10
   port                 = 80
   protocol             = "HTTP"
   target_type          = "instance"
@@ -215,7 +215,7 @@ resource "aws_lb_target_group" "lb_target_group_canary" {
     healthy_threshold   = 2
     matcher             = "200"
   }
-  deregistration_delay = 300
+  deregistration_delay = 10
   port                 = 80
   protocol             = "HTTP"
   target_type          = "instance"
