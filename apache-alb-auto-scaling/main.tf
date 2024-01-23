@@ -196,11 +196,12 @@ resource "aws_lb_target_group" "lb_target_group" {
     healthy_threshold   = 2
     matcher             = "200"
   }
-  port        = 80
-  protocol    = "HTTP"
-  target_type = "instance"
-  vpc_id      = var.vpc_id
-  name        = local.tg_name
+  deregistration_delay = 300
+  port                 = 80
+  protocol             = "HTTP"
+  target_type          = "instance"
+  vpc_id               = var.vpc_id
+  name                 = local.tg_name
 }
 
 resource "aws_lb_target_group" "lb_target_group_canary" {
@@ -214,11 +215,12 @@ resource "aws_lb_target_group" "lb_target_group_canary" {
     healthy_threshold   = 2
     matcher             = "200"
   }
-  port        = 80
-  protocol    = "HTTP"
-  target_type = "instance"
-  vpc_id      = var.vpc_id
-  name        = "${local.tg_name}-canary"
+  deregistration_delay = 300
+  port                 = 80
+  protocol             = "HTTP"
+  target_type          = "instance"
+  vpc_id               = var.vpc_id
+  name                 = "${local.tg_name}-canary"
 }
 
 resource "aws_s3_bucket" "s3_bucket" {
@@ -258,7 +260,7 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
   deployment_config_name = "CodeDeployDefault.AllAtOnce"
   service_role_arn       = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/CodeDeployRole"
   autoscaling_groups     = [aws_autoscaling_group.autoscaling_group.name]
-  
+
   deployment_style {
     deployment_type   = "IN_PLACE"
     deployment_option = "WITH_TRAFFIC_CONTROL"

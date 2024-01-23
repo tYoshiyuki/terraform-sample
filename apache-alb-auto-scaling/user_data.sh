@@ -5,6 +5,15 @@ set -x
 # Redirect /var/log/user-data.log and /dev/console
 exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
 
+# Apache HTTP Server
+sudo dnf install httpd -y
+
+touch /var/www/html/index.html
+echo "Apache ALB AutoScaling Sample!" | tee -a /var/www/html/index.html
+
+sudo systemctl start httpd
+sudo systemctl enable httpd
+
 # CodeDeploy Agent
 # Install necessary packages
 sudo dnf install ruby -y
@@ -16,12 +25,3 @@ chmod +x ./install
 ./install auto
 systemctl status codedeploy-agent
 cat /opt/codedeploy-agent/.version
-
-# Apache HTTP Server
-sudo dnf install httpd -y
-
-touch /var/www/html/index.html
-echo "Apache ALB AutoScaling Sample!" | tee -a /var/www/html/index.html
-
-sudo systemctl start httpd
-sudo systemctl enable httpd
