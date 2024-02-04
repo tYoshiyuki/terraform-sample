@@ -2,8 +2,6 @@
   {
     "name": "azp-agent",
     "image": "${image_rul}",
-    "cpu": 2048,
-    "memory": 3072,
     "portMappings": [],
     "essential": true,
     "environment": [
