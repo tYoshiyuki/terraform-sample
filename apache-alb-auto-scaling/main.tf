@@ -1,3 +1,6 @@
+# -------------------------------------------------------------------
+# Security Group
+# -------------------------------------------------------------------
 resource "aws_security_group" "alb" {
   description = local.sg_alb_name
   name        = local.sg_alb_name
@@ -64,6 +67,9 @@ resource "aws_security_group" "ec2" {
   }
 }
 
+# -------------------------------------------------------------------
+# Autoscaling Group (main + canary)
+# -------------------------------------------------------------------
 resource "aws_autoscaling_group" "main" {
   name = local.auto_scaling_name
   launch_template {
@@ -221,6 +227,9 @@ resource "aws_lb_target_group" "canary" {
   name                 = "${local.tg_name}-canary"
 }
 
+# -------------------------------------------------------------------
+# Code Pipeline, Code Deploy
+# -------------------------------------------------------------------
 resource "aws_s3_bucket" "main" {
   bucket        = local.s3_name
   force_destroy = true

@@ -14,6 +14,7 @@ echo "Apache ALB AutoScaling Sample!" | tee -a /var/www/html/index.html
 sudo systemctl start httpd
 sudo systemctl enable httpd
 
+# NOTE ユーザーデータとCodeDeployの動作順序を保証するため CodeDeploy Agent は最後に動かす必要がある
 # CodeDeploy Agent
 # Install necessary packages
 sudo dnf install ruby -y
