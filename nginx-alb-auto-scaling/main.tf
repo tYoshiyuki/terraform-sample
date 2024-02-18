@@ -1,6 +1,4 @@
-data "aws_caller_identity" "current" {}
-
-resource "aws_security_group" "security_group_alb" {
+resource "aws_security_group" "alb" {
   description = local.sg_alb_name
   name        = local.sg_alb_name
   tags = {
@@ -33,7 +31,7 @@ resource "aws_security_group" "security_group_alb" {
   }
 }
 
-resource "aws_security_group" "security_group_ec2" {
+resource "aws_security_group" "ec2" {
   description = local.sg_ec2_name
   name        = local.sg_ec2_name
   tags = {
@@ -66,10 +64,10 @@ resource "aws_security_group" "security_group_ec2" {
   }
 }
 
-resource "aws_autoscaling_group" "autoscaling_group" {
+resource "aws_autoscaling_group" "main" {
   name = local.auto_scaling_name
   launch_template {
-    id      = aws_launch_template.launch_template.id
+    id      = aws_launch_template.main.id
     version = "1"
   }
   min_size         = 1
@@ -82,7 +80,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
     var.vpc_subnet3
   ]
   target_group_arns = [
-    aws_lb_target_group.lb_target_group.arn
+    aws_lb_target_group.main.arn
   ]
   health_check_type         = "EC2"
   health_check_grace_period = 300
@@ -97,10 +95,10 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   }
 }
 
-resource "aws_autoscaling_group" "autoscaling_group_canary" {
+resource "aws_autoscaling_group" "canary" {
   name = "${local.auto_scaling_name}-canary"
   launch_template {
-    id      = aws_launch_template.launch_template.id
+    id      = aws_launch_template.main.id
     version = "1"
   }
   min_size         = 1
@@ -113,7 +111,7 @@ resource "aws_autoscaling_group" "autoscaling_group_canary" {
     var.vpc_subnet3
   ]
   target_group_arns = [
-    aws_lb_target_group.lb_target_group_canary.arn
+    aws_lb_target_group.canary.arn
   ]
   health_check_type         = "EC2"
   health_check_grace_period = 300
@@ -128,21 +126,21 @@ resource "aws_autoscaling_group" "autoscaling_group_canary" {
   }
 }
 
-resource "aws_launch_template" "launch_template" {
+resource "aws_launch_template" "main" {
   name      = local.launch_template_name
   user_data = filebase64("user_data.sh")
   iam_instance_profile {
     arn = aws_iam_instance_profile.iam.arn
   }
   vpc_security_group_ids = [
-    aws_security_group.security_group_ec2.id
+    aws_security_group.ec2.id
   ]
   key_name      = aws_key_pair.key_pair.key_name
   image_id      = local.image_id
   instance_type = local.instance_type
 }
 
-resource "aws_lb" "lb" {
+resource "aws_lb" "main" {
   name               = local.alb_name
   internal           = false
   load_balancer_type = "application"
@@ -152,7 +150,7 @@ resource "aws_lb" "lb" {
     var.vpc_subnet3
   ]
   security_groups = [
-    aws_security_group.security_group_alb.id
+    aws_security_group.alb.id
   ]
   ip_address_type = "ipv4"
   access_logs {
@@ -166,26 +164,26 @@ resource "aws_lb" "lb" {
   enable_cross_zone_load_balancing = "true"
 }
 
-resource "aws_lb_listener" "lb_listener" {
-  load_balancer_arn = aws_lb.lb.arn
+resource "aws_lb_listener" "main" {
+  load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
   default_action {
     type = "forward"
     forward {
       target_group {
-        arn    = aws_lb_target_group.lb_target_group.arn
+        arn    = aws_lb_target_group.main.arn
         weight = 2
       }
       target_group {
-        arn    = aws_lb_target_group.lb_target_group_canary.arn
+        arn    = aws_lb_target_group.canary.arn
         weight = 1
       }
     }
   }
 }
 
-resource "aws_lb_target_group" "lb_target_group" {
+resource "aws_lb_target_group" "main" {
   health_check {
     interval            = 30
     path                = "/"
@@ -203,7 +201,7 @@ resource "aws_lb_target_group" "lb_target_group" {
   name        = local.tg_name
 }
 
-resource "aws_lb_target_group" "lb_target_group_canary" {
+resource "aws_lb_target_group" "canary" {
   health_check {
     interval            = 30
     path                = "/"
