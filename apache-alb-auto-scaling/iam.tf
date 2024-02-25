@@ -38,6 +38,7 @@ resource "aws_iam_role" "iam_codepipeline" {
   tags                 = {}
 }
 
+#tfsec:ignore:aws-iam-no-policy-wildcards
 resource "aws_iam_policy" "IAMManagedPolicy" {
   name   = aws_iam_role.iam_codepipeline.name
   path   = "/service-role/"

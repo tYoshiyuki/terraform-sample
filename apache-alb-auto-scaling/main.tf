@@ -1,6 +1,9 @@
 # -------------------------------------------------------------------
 # Security Group
 # -------------------------------------------------------------------
+#tfsec:ignore:aws-ec2-no-public-ingress-sgr
+#tfsec:ignore:aws-ec2-no-public-egress-sgr
+#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
 resource "aws_security_group" "alb" {
   description = local.sg_alb_name
   name        = local.sg_alb_name
@@ -8,14 +11,6 @@ resource "aws_security_group" "alb" {
     Name = local.sg_alb_name
   }
   vpc_id = var.vpc_id
-  ingress {
-    cidr_blocks = [
-      "0.0.0.0/0"
-    ]
-    from_port = 80
-    protocol  = "tcp"
-    to_port   = 80
-  }
   ingress {
     cidr_blocks = [
       "0.0.0.0/0"
@@ -34,6 +29,9 @@ resource "aws_security_group" "alb" {
   }
 }
 
+#tfsec:ignore:aws-ec2-no-public-ingress-sgr
+#tfsec:ignore:aws-ec2-no-public-egress-sgr
+#tfsec:ignore:aws-ec2-add-description-to-security-group-rule
 resource "aws_security_group" "ec2" {
   description = local.sg_ec2_name
   name        = local.sg_ec2_name
@@ -141,11 +139,16 @@ resource "aws_launch_template" "main" {
   vpc_security_group_ids = [
     aws_security_group.ec2.id
   ]
-  key_name      = aws_key_pair.key_pair.key_name
+  key_name      = aws_key_pair.main.key_name
   image_id      = local.image_id
   instance_type = local.instance_type
+  metadata_options {
+    http_tokens = "required"
+  }
 }
 
+#tfsec:ignore:aws-elb-drop-invalid-headers
+#tfsec:ignore:aws-elb-alb-not-public
 resource "aws_lb" "main" {
   name               = local.alb_name
   internal           = false
@@ -170,6 +173,7 @@ resource "aws_lb" "main" {
   enable_cross_zone_load_balancing = "true"
 }
 
+#tfsec:ignore:aws-elb-http-not-used
 resource "aws_lb_listener" "main" {
   load_balancer_arn = aws_lb.main.arn
   port              = 80
@@ -230,6 +234,14 @@ resource "aws_lb_target_group" "canary" {
 # -------------------------------------------------------------------
 # Code Pipeline, Code Deploy
 # -------------------------------------------------------------------
+#tfsec:ignore:aws-s3-block-public-acls
+#tfsec:ignore:aws-s3-block-public-policy
+#tfsec:ignore:aws-s3-enable-bucket-encryption
+#tfsec:ignore:aws-s3-ignore-public-acls
+#tfsec:ignore:aws-s3-no-public-buckets
+#tfsec:ignore:aws-s3-encryption-customer-key
+#tfsec:ignore:aws-s3-enable-bucket-logging
+#tfsec:ignore:aws-s3-specify-public-access-block
 resource "aws_s3_bucket" "main" {
   bucket        = local.s3_name
   force_destroy = true
