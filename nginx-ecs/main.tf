@@ -1,10 +1,10 @@
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  family = local.ecs_task_definition_name
+  family                   = local.ecs_task_definition_name
   requires_compatibilities = ["FARGATE"]
-  cpu = "256"
-  memory = "512"
-  network_mode = "awsvpc"
-  container_definitions = file("./container_definitions.json")
+  cpu                      = "256"
+  memory                   = "512"
+  network_mode             = "awsvpc"
+  container_definitions    = file("./container_definitions.json")
 }
 
 resource "aws_ecs_cluster" "ecs_cluster" {
@@ -12,22 +12,22 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 }
 
 resource "aws_security_group" "ecs_security_group" {
-  name = local.ecs_security_group_name
+  name        = local.ecs_security_group_name
   description = local.ecs_security_group_name
 
   vpc_id = var.vpc_id
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -37,20 +37,20 @@ resource "aws_security_group" "ecs_security_group" {
 }
 
 resource "aws_ecs_service" "ecs_service" {
-  name = local.ecs_service_name
-  cluster = aws_ecs_cluster.ecs_cluster.arn
-  platform_version = "LATEST"
+  name                               = local.ecs_service_name
+  cluster                            = aws_ecs_cluster.ecs_cluster.arn
+  platform_version                   = "LATEST"
   deployment_minimum_healthy_percent = 100
-  deployment_maximum_percent = 200
-  propagate_tags = "SERVICE"
-  enable_execute_command = true
-  launch_type = "FARGATE"
-  desired_count = "1"
-  task_definition = aws_ecs_task_definition.ecs_task_definition.arn
+  deployment_maximum_percent         = 200
+  propagate_tags                     = "SERVICE"
+  enable_execute_command             = true
+  launch_type                        = "FARGATE"
+  desired_count                      = "1"
+  task_definition                    = aws_ecs_task_definition.ecs_task_definition.arn
 
   health_check_grace_period_seconds = 60
   deployment_circuit_breaker {
-    enable = true
+    enable   = true
     rollback = true
   }
 
@@ -66,7 +66,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.lb_target_group.arn
-    container_name = "nginx"
-    container_port = "80"
+    container_name   = "nginx"
+    container_port   = "80"
   }
 }
