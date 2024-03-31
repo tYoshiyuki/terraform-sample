@@ -1,4 +1,4 @@
-resource "aws_security_group" "main" {
+resource "aws_security_group" "alb" {
   name        = local.lb_security_group_name
   description = local.lb_security_group_name
 
@@ -17,7 +17,7 @@ resource "aws_security_group" "main" {
 }
 
 resource "aws_security_group_rule" "main" {
-  security_group_id = aws_security_group.main.id
+  security_group_id = aws_security_group.alb.id
 
   type = "ingress"
 
@@ -32,7 +32,7 @@ resource "aws_lb" "lb" {
   load_balancer_type = "application"
   name               = local.lb_name
 
-  security_groups = [aws_security_group.main.id]
+  security_groups = [aws_security_group.alb.id]
   subnets = [
     var.vpc_subnet1,
     var.vpc_subnet2,

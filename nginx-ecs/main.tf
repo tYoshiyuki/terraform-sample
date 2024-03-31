@@ -5,6 +5,8 @@ resource "aws_ecs_task_definition" "main" {
   memory                   = "512"
   network_mode             = "awsvpc"
   container_definitions    = file("./container_definitions.json")
+  execution_role_arn       = aws_iam_role.task_execution_role.arn
+  task_role_arn            = aws_iam_role.main.arn
 }
 
 resource "aws_ecs_cluster" "main" {
@@ -61,7 +63,7 @@ resource "aws_ecs_service" "main" {
       var.vpc_subnet2,
       var.vpc_subnet3
     ]
-    security_groups = [aws_security_group.main.id]
+    security_groups = [aws_security_group.alb.id]
   }
 
   load_balancer {
@@ -69,4 +71,45 @@ resource "aws_ecs_service" "main" {
     container_name   = "nginx"
     container_port   = "80"
   }
+}
+
+resource "aws_iam_role" "task_execution_role" {
+  name = local.task_execution_iam_role_name
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "ecs-tasks.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
+  ]
+}
+
+resource "aws_iam_role" "main" {
+  name = local.task_iam_role_name
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "ecs-tasks.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "main" {
+  name   = local.task_role_policy_name
+  policy = file("./policy.json")
+}
+
+resource "aws_iam_role_policy_attachment" "task_role_policy_attachment" {
+  role       = aws_iam_role.main.name
+  policy_arn = aws_iam_policy.main.arn
 }
