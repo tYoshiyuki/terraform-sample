@@ -1,4 +1,4 @@
-resource "aws_ecs_task_definition" "ecs_task_definition" {
+resource "aws_ecs_task_definition" "main" {
   family                   = local.ecs_task_definition_name
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -7,11 +7,11 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   container_definitions    = file("./container_definitions.json")
 }
 
-resource "aws_ecs_cluster" "ecs_cluster" {
+resource "aws_ecs_cluster" "main" {
   name = local.ecs_cluster_name
 }
 
-resource "aws_security_group" "ecs_security_group" {
+resource "aws_security_group" "main" {
   name        = local.ecs_security_group_name
   description = local.ecs_security_group_name
 
@@ -36,9 +36,9 @@ resource "aws_security_group" "ecs_security_group" {
   }
 }
 
-resource "aws_ecs_service" "ecs_service" {
+resource "aws_ecs_service" "main" {
   name                               = local.ecs_service_name
-  cluster                            = aws_ecs_cluster.ecs_cluster.arn
+  cluster                            = aws_ecs_cluster.main.arn
   platform_version                   = "LATEST"
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
@@ -46,7 +46,7 @@ resource "aws_ecs_service" "ecs_service" {
   enable_execute_command             = true
   launch_type                        = "FARGATE"
   desired_count                      = "1"
-  task_definition                    = aws_ecs_task_definition.ecs_task_definition.arn
+  task_definition                    = aws_ecs_task_definition.main.arn
 
   health_check_grace_period_seconds = 60
   deployment_circuit_breaker {
@@ -61,11 +61,11 @@ resource "aws_ecs_service" "ecs_service" {
       var.vpc_subnet2,
       var.vpc_subnet3
     ]
-    security_groups = [aws_security_group.ecs_security_group.id]
+    security_groups = [aws_security_group.main.id]
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.lb_target_group.arn
+    target_group_arn = aws_lb_target_group.main.arn
     container_name   = "nginx"
     container_port   = "80"
   }
