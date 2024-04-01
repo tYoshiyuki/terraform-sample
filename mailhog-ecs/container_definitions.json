@@ -1,0 +1,16 @@
+[
+  {
+    "name": "mailhog",
+    "image": "mailhog/mailhog:v1.0.1",
+    "portMappings": [
+      {
+        "containerPort": 1025,
+        "hostPort": 1025
+      },
+      {
+        "containerPort": 8025,
+        "hostPort": 8025
+      }
+    ]
+  }
+]

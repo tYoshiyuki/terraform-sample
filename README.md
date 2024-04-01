@@ -18,6 +18,9 @@ Terraform のサンプル。
 ### nginx-ecs
 - ECS (Fargate) のサンプル
 
+### mailhog-ecs
+- ECS (Fargate) + MailHog のサンプル
+
 ### azp-ecs
 - Azure DevOps PipeLine Agent と ECS (Fargate・EC2) のサンプル
 
