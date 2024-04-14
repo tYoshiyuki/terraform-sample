@@ -10,7 +10,8 @@ Terraform のサンプル。
     - CodePipeLine、CodeDeployによるブルー・グリーンデプロイ構成
 
 ### azp-ecs
-- Azure DevOps PipeLine Agent と ECS (Fargate・EC2) のサンプル
+- Azure DevOps PipeLine Agent と ECS (ECS on Fargate・ECS on EC2) のサンプル
+    - `terraform apply` 時に `docker build` を実施するため、実行時には Docker が必要
 
 ### mailhog-ecs
 - ECS (Fargate) + MailHog のサンプル
