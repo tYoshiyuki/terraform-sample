@@ -22,6 +22,7 @@ Terraform のサンプル。
 
 ### nginx-apprunner
 - App Runner のサンプル
+    - `terraform apply` 時に `docker build` を実施するため、実行時には Docker が必要
 
 ### nginx-ecs
 - ECS (Fargate) のサンプル
