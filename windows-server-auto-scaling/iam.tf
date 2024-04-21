@@ -1,4 +1,4 @@
-resource "aws_iam_role" "iam" {
+resource "aws_iam_role" "main" {
   path                 = "/"
   name                 = local.iam_role
   assume_role_policy   = file("./iam_policy.json")
@@ -6,10 +6,10 @@ resource "aws_iam_role" "iam" {
   tags                 = {}
 }
 
-resource "aws_iam_instance_profile" "iam" {
+resource "aws_iam_instance_profile" "main" {
   path = "/"
-  name = aws_iam_role.iam.name
-  role = aws_iam_role.iam.name
+  name = aws_iam_role.main.name
+  role = aws_iam_role.main.name
 }
 
 data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
@@ -17,6 +17,6 @@ data "aws_iam_policy" "AmazonSSMManagedInstanceCore" {
 }
 
 resource "aws_iam_role_policy_attachment" "iam" {
-  role       = aws_iam_role.iam.name
+  role       = aws_iam_role.main.name
   policy_arn = data.aws_iam_policy.AmazonSSMManagedInstanceCore.arn
 }

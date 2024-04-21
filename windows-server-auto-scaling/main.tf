@@ -1,6 +1,6 @@
 data "aws_caller_identity" "current" {}
 
-resource "aws_security_group" "security_group" {
+resource "aws_security_group" "main" {
   description = local.sg_name
   name        = local.sg_name
   tags = {
@@ -33,10 +33,10 @@ resource "aws_security_group" "security_group" {
   }
 }
 
-resource "aws_autoscaling_group" "autoscaling_group" {
+resource "aws_autoscaling_group" "main" {
   name = local.windows_server_auto_scaling
   launch_template {
-    id      = aws_launch_template.launch_template.id
+    id      = aws_launch_template.main.id
     version = "1"
   }
   min_size         = 1
@@ -59,15 +59,24 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   }
 }
 
-resource "aws_launch_template" "launch_template" {
+resource "aws_launch_template" "main" {
   name = local.windows_server_launch_template
   iam_instance_profile {
-    arn = aws_iam_instance_profile.iam.arn
+    arn = aws_iam_instance_profile.main.arn
   }
   vpc_security_group_ids = [
-    aws_security_group.security_group.id
+    aws_security_group.main.id
   ]
   key_name      = aws_key_pair.key_pair.key_name
-  image_id      = local.image_id
+  image_id      = data.aws_ami.windows-2019.id
   instance_type = local.instance_type
+}
+
+data "aws_ami" "windows-2019" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2019-Japanese-Full-Base*"]
+  }
 }
