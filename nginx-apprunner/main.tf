@@ -43,7 +43,7 @@ resource "time_sleep" "wait_10_seconds" {
   create_duration = "10s"
 
   triggers = {
-    iam_arn = aws_iam_role.iam.arn
+    iam_arn = aws_iam_role.main.arn
   }
 }
 
