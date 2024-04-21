@@ -7,7 +7,7 @@ module "app-runner" {
 
   create_ingress_vpc_connection = true
   ingress_vpc_id                = var.vpc_id
-  ingress_vpc_endpoint_id       = aws_vpc_endpoint.vpc_endpoint.id
+  ingress_vpc_endpoint_id       = aws_vpc_endpoint.main.id
 
   auto_scaling_configurations = var.auto_scaling_configurations
 
@@ -31,7 +31,7 @@ module "app-runner" {
       image_configuration = {
         port = 80
       }
-      image_identifier      = "${aws_ecr_repository.ecr_repository.repository_url}:latest"
+      image_identifier      = "${aws_ecr_repository.main.repository_url}:latest"
       image_repository_type = "ECR"
     }
   }
@@ -57,7 +57,7 @@ module "security-group" {
   name = "sample-app-runner-sg"
 }
 
-resource "aws_vpc_endpoint" "vpc_endpoint" {
+resource "aws_vpc_endpoint" "main" {
   vpc_id            = var.vpc_id
   subnet_ids        = [var.vpc_subnet1, var.vpc_subnet2, var.vpc_subnet3]
   service_name      = "com.amazonaws.ap-northeast-1.apprunner.requests"
@@ -68,7 +68,7 @@ resource "aws_vpc_endpoint" "vpc_endpoint" {
   ]
 }
 
-resource "aws_ecr_repository" "ecr_repository" {
+resource "aws_ecr_repository" "main" {
   name                 = var.service_name
   image_tag_mutability = "MUTABLE"
   force_delete         = true
@@ -90,8 +90,8 @@ resource "null_resource" "docker_image" {
     environment = {
       AWS_REGION     = "ap-northeast-1"
       AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
-      REPO_URL       = aws_ecr_repository.ecr_repository.repository_url
-      CONTAINER_NAME = aws_ecr_repository.ecr_repository.name
+      REPO_URL       = aws_ecr_repository.main.repository_url
+      CONTAINER_NAME = aws_ecr_repository.main.name
     }
   }
 }
