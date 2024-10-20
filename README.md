@@ -27,5 +27,8 @@ Terraform のサンプル。
 ### nginx-ecs
 - ECS (Fargate) のサンプル
 
+### nginx-ecs-on-ec2
+- ECS (EC2) のサンプル
+
 ### windows-server-auto-scaling
 - Windows Server + オートスケーリンググループ のサンプル
