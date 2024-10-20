@@ -1,3 +1,6 @@
+# -------------------------------------------------------------------
+# ALB
+# -------------------------------------------------------------------
 resource "aws_security_group" "alb" {
   name        = local.lb_security_group_name
   description = local.lb_security_group_name

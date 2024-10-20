@@ -15,8 +15,8 @@
           "essential": true
       }
   ],
-  "taskRoleArn": "arn:aws:iam::079080703552:role/SampleEcsTaskRole",
-  "executionRoleArn": "arn:aws:iam::079080703552:role/SampleEcsTaskExecutionRole",
+  "taskRoleArn": "${task_role}",
+  "executionRoleArn": "${task_execution_role}",
   "networkMode": "bridge",
   "requiresCompatibilities": [
       "EC2"

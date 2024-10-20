@@ -5,6 +5,7 @@ locals {
   ecs_capacity_provider_name          = "sample-capacity-provider"
   ecs_security_group_name             = "sample-ecs-security-group"
   autoscaling_group_name              = "sample-asg-ecs-cluster"
+  launch_template_name                = "sample-launch-template"
   lb_name                             = "sample-lb"
   lb_target_group_name                = "sample-lb-target-group"
   lb_target_group_sub_name            = "sample-lb-target-group-sub"
