@@ -7,3 +7,7 @@ Resources:
         LoadBalancerInfo:
           ContainerName: "nginx"
           ContainerPort: 80
+        CapacityProviderStrategy:
+          - CapacityProvider: "sample-capacity-provider"
+            Base: 0
+            Weight: 1
