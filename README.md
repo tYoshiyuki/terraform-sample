@@ -33,5 +33,9 @@ Terraform のサンプル。
 ### nginx-ecs-on-ec2-by-nlb
 - ECS (EC2) のサンプル (NLB版)
 
+### nginx-ecs-on-ec2-multiple-service
+- ECS (EC2) のサンプル (ALB版)
+    - ECS Serviceが複数構成
+
 ### windows-server-auto-scaling
 - Windows Server + オートスケーリンググループ のサンプル
