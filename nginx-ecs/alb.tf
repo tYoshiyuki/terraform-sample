@@ -87,10 +87,10 @@ resource "aws_lb_listener_rule" "main" {
         weight = 0
       }
 
-      target_group {
-        arn    = aws_lb_target_group.canary.arn
-        weight = 0
-      }
+      # target_group {
+      #   arn    = aws_lb_target_group.canary.arn
+      #   weight = 0
+      # }
 
     }
   }
@@ -116,6 +116,7 @@ resource "aws_lb_target_group" "green" {
   }
 }
 
+# 実験用リソース
 # resource "aws_lb_target_group" "canary" {
 #   name   = "${local.lb_target_group_name}-canary"
 #   vpc_id = var.vpc_id
