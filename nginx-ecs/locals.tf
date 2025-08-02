@@ -8,5 +8,6 @@ locals {
   lb_security_group_name       = "sample-lb-security-group"
   task_execution_iam_role_name = "SampleEcsTaskExecutionRole"
   task_iam_role_name           = "SampleEcsTaskRole"
+  ecs_infra_role_iam_role_name = "SampleEcsInfrastructureRole"
   task_role_policy_name        = "sample-task-role-policy"
 }

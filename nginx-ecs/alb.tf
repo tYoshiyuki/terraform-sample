@@ -75,8 +75,24 @@ resource "aws_lb_listener_rule" "main" {
   listener_arn = aws_lb_listener.main.arn
 
   action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.main.arn
+    type = "forward"
+    forward {
+      target_group {
+        arn    = aws_lb_target_group.main.arn
+        weight = 100
+      }
+
+      target_group {
+        arn    = aws_lb_target_group.green.arn
+        weight = 0
+      }
+
+      target_group {
+        arn    = aws_lb_target_group.canary.arn
+        weight = 0
+      }
+
+    }
   }
 
   condition {
@@ -85,3 +101,31 @@ resource "aws_lb_listener_rule" "main" {
     }
   }
 }
+
+resource "aws_lb_target_group" "green" {
+  name   = "${local.lb_target_group_name}-green"
+  vpc_id = var.vpc_id
+
+  port        = 80
+  protocol    = "HTTP"
+  target_type = "ip"
+
+  health_check {
+    path = "/"
+    port = 80
+  }
+}
+
+# resource "aws_lb_target_group" "canary" {
+#   name   = "${local.lb_target_group_name}-canary"
+#   vpc_id = var.vpc_id
+
+#   port        = 80
+#   protocol    = "HTTP"
+#   target_type = "ip"
+
+#   health_check {
+#     path = "/"
+#     port = 80
+#   }
+# }

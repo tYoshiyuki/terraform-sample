@@ -66,10 +66,24 @@ resource "aws_ecs_service" "main" {
     security_groups = [aws_security_group.alb.id]
   }
 
+  deployment_controller {
+    type = "ECS"
+  }
+
+  deployment_configuration {
+    strategy             = "BLUE_GREEN"
+    bake_time_in_minutes = "0"
+  }
+
   load_balancer {
     target_group_arn = aws_lb_target_group.main.arn
     container_name   = "nginx"
     container_port   = "80"
+    advanced_configuration {
+      alternate_target_group_arn = aws_lb_target_group.green.arn
+      production_listener_rule   = aws_lb_listener_rule.main.arn
+      role_arn                   = aws_iam_role.ecs_infra_role.arn
+    }
   }
 }
 
@@ -85,9 +99,11 @@ resource "aws_iam_role" "task_execution_role" {
       }
     ]
   })
-  managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy",
-  ]
+}
+
+resource "aws_iam_role_policy_attachment" "task_execution_role_policy_attachment" {
+  role       = aws_iam_role.task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 resource "aws_iam_role" "main" {
@@ -112,4 +128,23 @@ resource "aws_iam_policy" "main" {
 resource "aws_iam_role_policy_attachment" "task_role_policy_attachment" {
   role       = aws_iam_role.main.name
   policy_arn = aws_iam_policy.main.arn
+}
+
+resource "aws_iam_role" "ecs_infra_role" {
+  name = local.ecs_infra_role_iam_role_name
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "ecs.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_infra_role_policy_attachment" {
+  role       = aws_iam_role.ecs_infra_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECSInfrastructureRolePolicyForLoadBalancers"
 }
